@@ -116,15 +116,26 @@ class ELFSecurity(BinarySecurity):
 
     @property
     def relro(self) -> RelroType:
+        _dynamic_tags_set = None
         try:
-            self.bin.get(lief.ELF.SEGMENT_TYPES.GNU_RELRO)
-            if lief.ELF.DYNAMIC_FLAGS.BIND_NOW in self.bin.get(lief.ELF.DYNAMIC_TAGS.FLAGS):
-                return RelroType.Full
-            else:
-                return RelroType.Partial
+            self.bin.get(lief.ELF.SEGMENT_TYPES.GNU_RELRO)  
         except lief.not_found:
             return RelroType.No
-
+        try:
+            _dynamic_tags_set = self.bin.get(lief.ELF.DYNAMIC_TAGS.FLAGS)
+        except:
+            try:
+                if not _dynamic_tags_set:
+                    _dynamic_tags_set = self.bin.get(lief.ELF.DYNAMIC_TAGS.FLAGS_1)
+            except lief.not_found:
+                return RelroType.Partial
+        
+        if lief.ELF.DYNAMIC_FLAGS.BIND_NOW in _dynamic_tags_set \
+            or lief.ELF.DYNAMIC_FLAGS_1.NOW in _dynamic_tags_set :
+            return RelroType.Full
+        else:
+            return RelroType.Partial
+            
     @property
     def has_canary(self) -> bool:
         canary_sections = ["__stack_chk_fail", "__intel_security_cookie"]
