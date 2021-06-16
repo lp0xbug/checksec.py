@@ -149,11 +149,16 @@ class ELFSecurity(BinarySecurity):
 
     @property
     def pie(self) -> PIEType:
+        '''
         if self.bin.is_pie:
             if self.bin.has(lief.ELF.DYNAMIC_TAGS.DEBUG):
                 return PIEType.PIE
             else:
                 return PIEType.DSO
+        return PIEType.No
+        '''
+        if self.bin.header.file_type == lief.ELF.E_TYPE.DYNAMIC:
+            return PIEType.PIE
         return PIEType.No
 
     @property
