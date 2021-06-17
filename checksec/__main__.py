@@ -122,6 +122,9 @@ def main(args):
                         filepath = future_to_checksec[future]
                         try:
                             data = future.result()
+                            if not data:
+                                #file which is not executable or dynamic, we will get None obj
+                                continue
                         except FileNotFoundError:
                             logging.debug("%s does not exist", filepath)
                         except ErrorParsingFailed:

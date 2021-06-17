@@ -217,6 +217,14 @@ class ELFSecurity(BinarySecurity):
 
     @property
     def checksec_state(self) -> ELFChecksecData:
+        '''
+        only check excutable and dynamic file
+        '''
+        file_type = self.bin.header.file_type
+        if not file_type == lief.ELF.E_TYPE.DYNAMIC and \
+            not file_type == lief.ELF.E_TYPE.EXECUTABLE:
+            return None
+
         fortify_source = None
         fortified_count = None
         fortifiable_count = None
